@@ -1,0 +1,104 @@
+Sub tickertotaler()
+
+
+Dim ws As Worksheet
+Dim ticker As String
+Dim vol As Long
+Dim year_open As Double
+Dim year_close As Double
+Dim yearly_change As Double
+Dim percent_change As Double
+Dim Summary_Rows As Integer
+Dim lastRow As Integer
+Dim vMax, vMin
+
+On Error Resume Next
+
+For Each ws In ActiveWorkbook.Worksheets
+   
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+    ws.Range("C: F").Style = "Currency"
+    ws.Cells(1, 15).Value = "Ticker"
+    ws.Cells(1, 16).Value = "Value"
+    ws.Cells(2, 14).Value = "Greatest Percentage Increase"
+    ws.Cells(3, 14).Value = "Greatest Percentage Decrease"
+    ws.Cells(4, 14).Value = "Greatest Total Volume"
+  
+        
+
+    Percentage_Rows = 2
+    
+
+        For I = 2 To ws.UsedRange.Rows.Count
+             If ws.Cells(I + 1, 1).Value <> ws.Cells(I, 1).Value Then
+             
+             lastRow = ws.Cells(Rows.Count, 1).End(x1Up).Row
+            
+             ticker = ws.Cells(I, 1).Value
+            vol = ws.Cells(I, 7).Value
+
+            year_open = ws.Cells(I, 3).Value
+            year_close = ws.Cells(I, 6).Value
+
+            yearly_change = year_close - year_open
+            percent_change = (year_close - year_open) / year_close
+            
+            ws.Cells(Percentage_Rows, 9).Value = ticker
+            ws.Cells(Percentage_Rows, 10).Value = yearly_change
+            ws.Cells(Percentage_Rows, 11).Value = percent_change
+            ws.Cells(Percentage_Rows, 12).Value = vol
+            Percentage_Rows = Percentage_Rows + 1
+            
+        
+        vol = 0
+         End If
+    Next I
+  
+ws.Columns("K").NumberFormat = "0.00%"
+ws.Range("P2, P3").NumberFormat = "0.00%"
+ws.Cells(16, 4).NumberFormat = "General"
+
+
+Dim rg As Range
+    Dim g As Long
+    Dim c As Long
+    Dim color_cell As Range
+    
+    Set rg = ws.Range("J2", ws.Range("J2").End(xlDown))
+    c = rg.Cells.Count
+    
+    For g = 1 To c
+    Set color_cell = rg(g)
+    Select Case color_cell
+        Case Is >= 0
+            With color_cell
+                .Interior.Color = vbGreen
+            End With
+        Case Is < 0
+            With color_cell
+                .Interior.Color = vbRed
+            End With
+       End Select
+    Next g
+    
+'found min max info from a 2010 conversation on ozgrid.com postedby Readfidy and made it work for my needs
+
+vMax = Application.WorksheetFunction.max(ws.Columns("K"))
+vMin = Application.WorksheetFunction.Min(ws.Columns("K"))
+vMax = Application.WorksheetFunction.max(ws.Columns("L"))
+
+ws.Range("P2") = vMax
+ws.Range("P3") = vMin
+ws.Range("P4") = vMax
+
+ws.Range("P4").NumberFormat = "General"
+ws.Range("P2", "P3").NumberFormat = "0.00%"
+
+
+    
+Next ws
+
+End Sub
